@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUOTA - La Ruota della Fortunissima</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎡 RUOTA DELLA FORTUNISSIMA 🎡</h1>
+            <p>Gira la ruota e scopri la tua fortuna!</p>
+        </header>
+
+        <main>
+            <div class="wheel-container">
+                <div class="wheel-pointer">▼</div>
+                <canvas id="wheelCanvas" width="400" height="400"></canvas>
+            </div>
+
+            <div class="controls">
+                <button id="spinButton" class="spin-btn">GIRA LA RUOTA!</button>
+                <div id="result" class="result"></div>
+            </div>
+
+            <div class="prize-history">
+                <h3>Ultimi Risultati:</h3>
+                <ul id="historyList"></ul>
+            </div>
+        </main>
+
+        <footer>
+            <p>Creato con ❤️ per GitHub Pages</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
