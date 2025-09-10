@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Ruota della Fortuna 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;700&display=swap');
+    html, body {
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden !important;
+        box-sizing: border-box;
+    }
+        
+        :root {
+            --bg-color: #0d0d2b;
+            --primary-neon: #00ffff;
+            --secondary-neon: #ff00ff;
+            --text-color: #f0f8ff;
+            --border-color: rgba(0, 255, 255, 0.5);
+            --shadow-color-primary: rgba(0, 255, 255, 0.7);
+            --shadow-color-secondary: rgba(255, 0, 255, 0.7);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            background-image: radial-gradient(circle at top left, rgba(0, 255, 255, 0.1), transparent 30%),
+                              radial-gradient(circle at bottom right, rgba(255, 0, 255, 0.1), transparent 30%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            padding: 0;
+        }
+
+        .container {
+            background: rgba(13, 13, 43, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: 0 0 20px var(--shadow-color-primary), 0 0 40px var(--shadow-color-secondary) inset;
+            padding: 2vw;
+            max-width: 98vw;
+            max-height: 98vh;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1, h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 5px var(--primary-neon), 0 0 10px var(--secondary-neon);
+        }
+
+        #category {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-neon);
+            text-shadow: 0 0 5px var(--primary-neon);
+            font-size: 1.75rem;
+        }
+
+        #puzzle-board .puzzle-row {
+            display: grid;
+            gap: 0.25rem;
+            justify-content: center;
+            margin: 0.15rem 0;
+        }
+        #puzzle-board .row-1,
+        #puzzle-board .row-4 {
+            grid-template-columns: repeat(12, 44px);
+        }
+        #puzzle-board .row-2,
+        #puzzle-board .row-3 {
+            grid-template-columns: repeat(14, 44px);
+        }
+        #puzzle-board .letter-box {
+            width: 44px;
+            height: 44px;
+            background: #ffffff;
+            border: 3px solid var(--primary-neon);
+            color: transparent; /* Lettere nascoste rendendo il testo trasparente */
+            user-select: none;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 24px;
+            transition: transform 0.6s, color 0.6s; /* Transizione per il colore */
+            transform-style: preserve-3d;
+            text-shadow: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #puzzle-board .letter-box.revealed {
+            background: #ffffff;
+            color: #000000; /* Lettere visibili (nere) */
+            text-shadow: none;
+            transform: rotateY(360deg);
+        }
+        
+        #puzzle-board .letter-box.space {
+            background: transparent;
+            border: none;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: min(38vw, 38vh);
+            aspect-ratio: 1/1;
+            max-width: 98vw;
+            max-height: 80vh;
+            min-width: 180px;
+            min-height: 180px;
+            margin: auto;
+        }
+        #wheel {
+            width: 100%;
+            height: 100%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid #fff;
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            box-shadow: 0 0 25px var(--shadow-color-primary), 0 0 45px var(--shadow-color-secondary);
+            position: relative;
+            background: transparent;
+            overflow: hidden;
+        }
+        #pointer {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 24px solid transparent;
+            border-right: 24px solid transparent;
+            border-bottom: 40px solid var(--primary-neon); /* punta verso l'alto */
+            filter: drop-shadow(0 0 6px var(--primary-neon));
+            z-index: 10;
+        }
+
+        .btn-neon {
+            border: 2px solid var(--primary-neon);
+            color: var(--primary-neon);
+            background: transparent;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px var(--primary-neon);
+            box-shadow: 0 0 10px var(--primary-neon) inset, 0 0 5px var(--primary-neon);
+        }
+        .btn-neon:hover:not(:disabled) {
+            background: var(--primary-neon);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--primary-neon), 0 0 30px var(--primary-neon) inset;
+        }
+        .btn-neon:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: gray;
+            color: gray;
+            text-shadow: none;
+            box-shadow: none;
+        }
+
+        /* Stili per la tastiera virtuale */
+        #keyboard {
+            display: grid;
+            grid-template-columns: repeat(5, 40px);
+            gap: 0.5rem;
+            justify-items: center;
+        }
+        
+        #game-layout {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2vw;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 60vh;
+        }
+        
+        .left-panel {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .center-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .right-panel {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        
+        #keyboard {
+            display: grid;
+            grid-template-columns: repeat(5, 40px);
+            gap: 0.5rem;
+            justify-items: center;
+            width: 250px;
+        }
+        
+        #scoreboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        #puzzle-board {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.25rem;
+            margin: 1rem 0;
+        }
+        .key {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--primary-neon);
+            color: var(--primary-neon);
+            background: transparent;
+            border-radius: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+        .key:hover:not(:disabled) {
+            background: var(--primary-neon);
+            color: var(--bg-color);
+        }
+        .key:disabled {
+            border-color: #4a4a4a;
+            color: #4a4a4a;
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+    </style>
+    <style>
+    /* Responsive per mobile */
+    @media (max-width: 900px) {
+        .container {
+            padding: 1vw;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+        .wheel-container {
+            width: min(80vw, 40vh);
+            aspect-ratio: 1/1;
+            min-width: 120px;
+            min-height: 120px;
+        }
+        #game-layout {
+            flex-direction: column;
+            align-items: center;
+            gap: 2vw;
+            height: auto;
+        }
+        .left-panel, .center-panel, .right-panel {
+            width: 100%;
+            min-width: 0;
+            flex: unset;
+        }
+    }
+    @media (max-width: 500px) {
+        .container {
+            padding: 0.5vw;
+        }
+        .wheel-container {
+            width: min(96vw, 40vh);
+            aspect-ratio: 1/1;
+            min-width: 80px;
+            min-height: 80px;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header: titolo a sinistra, info round al centro -->
+    <div class="flex items-start justify-between">
+            <div class="text-left w-1/3">
+                <h1 class="text-3xl font-bold leading-tight">LA RUOTA<br/>DELLA FORTUNA 2025</h1>
+            </div>
+            <div class="text-center w-1/3">
+                <h2 id="round-title" class="text-2xl text-cyan-400"></h2>
+                <p id="round-description" class="text-lg"></p>
+        <div id="category" class="text-center text-xl mt-1"></div>
+            </div>
+            <div class="w-1/3"></div>
+        </div>
+
+        <!-- Area di Gioco Principale -->
+        <div id="game-area" class="mt-4">
+            <div id="puzzle-board" class="flex flex-col items-center"></div>
+        </div>
+        
+        <!-- Layout di Gioco -->
+        <div id="game-layout" class="flex justify-between items-start gap-8">
+            <div class="left-panel flex-1 flex flex-col items-center">
+                <div id="keyboard"></div>
+                <div class="buttons flex flex-col gap-4 mt-8 w-full items-center">
+                    <button id="spin-btn" class="btn-neon w-48">GIRA LA RUOTA</button>
+                    <button id="buy-vowel-btn" class="btn-neon w-48">COMPRA VOCALE (€250)</button>
+                    <button id="solve-btn" class="btn-neon w-48">RISOLVI</button>
+                </div>
+            </div>
+            <div class="center-panel flex-1 flex flex-col items-center">
+                <div id="category" class="text-center text-xl my-4"></div>
+                <div class="wheel-container mt-8">
+                    <div id="pointer"></div>
+                    <div id="wheel">
+                        <svg style="width:100%;height:100%;display:block;" viewBox="0 0 600 600"></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="right-panel flex-1 flex flex-col items-center">
+                <div class="mb-6">
+                    <h3 class="text-lg text-cyan-300">Turno</h3>
+                    <p id="turn" class="text-2xl font-bold">Giocatore 1</p>
+                </div>
+                <div id="scoreboard" class="flex flex-col items-center gap-4">
+                    <div class="text-center border border-cyan-500 p-2 rounded w-52">
+                        <input type="text" id="player-0-name" value="Giocatore 1" class="text-lg font-bold text-center bg-transparent border-none outline-none w-full" style="color: var(--text-color);">
+                        <p class="text-sm text-cyan-300">TOT: <span id="tot-0">€0</span></p>
+                        <p class="text-sm text-yellow-300">ORA: <span id="ora-0">€0</span></p>
+                        <p class="text-sm text-pink-400">Jolly: <span id="jolly-0">0</span></p>
+                    </div>
+                    <div class="text-center border border-cyan-500 p-2 rounded w-52">
+                        <input type="text" id="player-1-name" value="Giocatore 2" class="text-lg font-bold text-center bg-transparent border-none outline-none w-full" style="color: var(--text-color);">
+                        <p class="text-sm text-cyan-300">TOT: <span id="tot-1">€0</span></p>
+                        <p class="text-sm text-yellow-300">ORA: <span id="ora-1">€0</span></p>
+                        <p class="text-sm text-pink-400">Jolly: <span id="jolly-1">0</span></p>
+                    </div>
+                    <div class="text-center border border-cyan-500 p-2 rounded w-52">
+                        <input type="text" id="player-2-name" value="Giocatore 3" class="text-lg font-bold text-center bg-transparent border-none outline-none w-full" style="color: var(--text-color);">
+                        <p class="text-sm text-cyan-300">TOT: <span id="tot-2">€0</span></p>
+                        <p class="text-sm text-yellow-300">ORA: <span id="ora-2">€0</span></p>
+                        <p class="text-sm text-pink-400">Jolly: <span id="jolly-2">0</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pulsante per passare al round successivo -->
+        <div class="text-center mt-4">
+            <button id="next-round-btn" class="btn-neon bg-green-500 border-green-500 text-white hidden">PROSSIMO ROUND</button>
+        </div>
+
+        <!-- Messaggi e Input per la soluzione -->
+        <div id="message-overlay" class="fixed inset-0 bg-black bg-opacity-70 hidden justify-center items-center z-50">
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg text-center border border-cyan-400 max-w-sm w-full">
+                <p id="message-text" class="text-2xl mb-4"></p>
+                <div id="solve-input-box" class="hidden flex-col items-center gap-2">
+                    <input type="text" id="solve-input" class="bg-gray-900 text-white p-2 rounded w-full" placeholder="Scrivi la soluzione...">
+                    <button id="submit-solve-btn" class="btn-neon w-full">CONFERMA</button>
+                </div>
+                <button id="close-message-btn" class="btn-neon mt-4">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementi del DOM
+            const wheel = document.getElementById('wheel');
+            const spinBtn = document.getElementById('spin-btn');
+            const buyVowelBtn = document.getElementById('buy-vowel-btn');
+            const solveBtn = document.getElementById('solve-btn');
+            const nextRoundBtn = document.getElementById('next-round-btn');
+            const keyboardContainer = document.getElementById('keyboard');
+
+            const puzzleBoard = document.getElementById('puzzle-board');
+            const categoryDisplay = document.getElementById('category');
+            const turnDisplay = document.getElementById('turn');
+            // scoreDisplays legacy removed; now separate TOT/ORA counters
+            
+            const messageOverlay = document.getElementById('message-overlay');
+            const messageText = document.getElementById('message-text');
+            const closeMessageBtn = document.getElementById('close-message-btn');
+            const solveInputBox = document.getElementById('solve-input-box');
+            const solveInput = document.getElementById('solve-input');
+            const submitSolveBtn = document.getElementById('submit-solve-btn');
+
+            const roundTitle = document.getElementById('round-title');
+            const roundDescription = document.getElementById('round-description');
+            
+            // Stato del gioco
+            let playerScores = [0, 0, 0]; // TOT
+            let roundScores = [0, 0, 0];  // ORA
+            let playerJolly = [0, 0, 0];
+            let currentPlayerIndex = 0;
+            let currentPhrase = '';
+            let guessedLetters = [];
+            let currentRoundIndex = 0;
+            let wheelSpinning = false;
+            let currentWheelAngle = 0; 
+            let allConsonantsRevealed = false;
+            let currentSpinValue = null;
+            
+            const VOWELS = ['A', 'E', 'I', 'O', 'U'];
+            const CONSONANTS = 'BCDFGHJKLMNPQRSTVWXYZ'.split('');
+
+            // Configurazioni ruota per round (24 spicchi)
+            const wheelConfigs = {
+                ROUND1: [300, 350, 400, 'PASSAMANO', 450, 500, 550, 'JOLLY', 600, 650, 'BANCA ROTTA', 700, 750, 800, 850, 900, 300, 400, 500, 600, 700, 800, 900, 'PASSAMANO'],
+                ROUND2: [400, 450, 500, 'PASSAMANO', 550, 600, 650, 'JOLLY', 700, 750, 'BANCA ROTTA', 800, 850, 900, 950, 1000, 450, 550, 650, 750, 850, 950, 1000, 'PASSAMANO'],
+                FINALE: [500, 600, 700, 'PASSAMANO', 800, 900, 1000, 'JOLLY', 1100, 1200, 'BANCA ROTTA', 1300, 900, 1000, 1100, 1200, 700, 800, 900, 1000, 1100, 1200, 1300, 'PASSAMANO']
+            };
+            let wheelSegments = [];
+            
+            function createWheelSegments() {
+                const svg = document.querySelector('#wheel svg');
+                svg.innerHTML = '';
+                // Calcola la dimensione effettiva del contenitore SVG (responsive)
+                let size = svg.clientWidth || svg.parentElement.clientWidth || 600;
+                // Aggiorna anche la viewBox per mantenere proporzioni
+                svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+                const cx = size / 2;
+                const cy = size / 2;
+                const r = size / 2;
+                const numSegments = wheelSegments.length;
+                const angle = 360 / numSegments;
+                const colors = [
+                    '#ff00ff', '#8a2be2', '#0000ff', '#00ffff', '#00ff00', '#ffff00',
+                    '#ff7f00', '#ff0000', '#ff1493', '#7fffd4', '#1e90ff', '#adff2f',
+                    '#ffd700', '#ff8c00', '#ff4500', '#dc143c', '#ff69b4', '#40e0d0',
+                    '#6a5acd', '#00fa9a', '#daa520', '#ff6347', '#ba55d3', '#87cefa'
+                ];
+                for (let i = 0; i < numSegments; i++) {
+                    const startAngle = (i * angle) * Math.PI / 180;
+                    const endAngle = ((i + 1) * angle) * Math.PI / 180;
+                    const x1 = cx + r * Math.cos(startAngle);
+                    const y1 = cy + r * Math.sin(startAngle);
+                    const x2 = cx + r * Math.cos(endAngle);
+                    const y2 = cy + r * Math.sin(endAngle);
+                    const largeArc = angle > 180 ? 1 : 0;
+                    const pathData = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', pathData);
+                    path.setAttribute('fill', colors[i % colors.length]);
+                    path.setAttribute('stroke', '#fff');
+                    path.setAttribute('stroke-width', size * 0.008);
+                    svg.appendChild(path);
+                    // Testo leggermente ruotato verso l'interno dello spicchio
+                    const textAngleDeg = (i * angle + angle / 2);
+                    const textAngle = textAngleDeg * Math.PI / 180;
+                    const tx = cx + (r * 0.68) * Math.cos(textAngle);
+                    const ty = cy + (r * 0.68) * Math.sin(textAngle);
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', tx);
+                    text.setAttribute('y', ty);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('font-family', 'Orbitron');
+                    text.setAttribute('font-weight', 'bold');
+                    text.setAttribute('font-size', Math.max(size * 0.045, 12));
+                    text.setAttribute('fill', '#000');
+                    // Ruota la parola di 90° rispetto al centro
+                    text.setAttribute('transform', `rotate(${textAngleDeg + 180} ${tx} ${ty})`);
+                    text.textContent = wheelSegments[i];
+                    svg.appendChild(text);
+                }
+            }
+            
+            const gameRounds = [
+                { type: 'CLASSIC', title: 'Round 1', description: 'Gira la ruota e indovina le consonanti!' },
+                { type: 'CLASSIC', title: 'Round 2', description: 'Ancora un puzzle da risolvere!' },
+                { type: 'FINALE', title: 'Round Finale', description: 'Il vincitore gioca per il super premio!'},
+            ];
+
+            const phrases = [
+                { category: "Città Italiane", phrase: "ROMA CAPUT MUNDI" },
+                { category: "Città Italiane", phrase: "NAPOLI CITTA PARTENOPEA" },
+                { category: "Città Italiane", phrase: "FIRENZE CULLA DEL RINASCIMENTO" },
+                { category: "Luoghi Famosi", phrase: "TORRE DI PISA" },
+                { category: "Luoghi Famosi", phrase: "PONTE VECCHIO" },
+                { category: "Film Famosi", phrase: "IL SIGNORE DEGLI ANELLI" },
+                { category: "Film Famosi", phrase: "RITORNO AL FUTURO" },
+                { category: "Programmi TV", phrase: "LA CASA DI CARTA" },
+                { category: "Opere Letterarie", phrase: "VENTIMILA LEGHE SOTTO I MARI" },
+                { category: "Opere Letterarie", phrase: "I PROMESSI SPOSI" },
+                { category: "Modi di Dire", phrase: "TRA IL DIRE E IL FARE" },
+                { category: "Modi di Dire", phrase: "CHI TARDI ARRIVA MALE ALLOGGIA" },
+                { category: "Cucina", phrase: "SPAGHETTI AGLIO OLIO E PEPERONCINO" },
+                { category: "Sport", phrase: "CAMPIONATO DI SERIE A" },
+                { category: "Tecnologia", phrase: "INTELLIGENZA ARTIFICIALE" },
+                { category: "Musica", phrase: "FESTIVAL DI SANREMO" },
+                { category: "Scienza", phrase: "ELETTROENCEFALOGRAFIA" },
+                { category: "Storia", phrase: "GIULIO CESARE" },
+                { category: "Automobili", phrase: "ALFA ROMEO GIULIA" },
+                { category: "Viaggi", phrase: "GIRO DEL MONDO" },
+                { category: "Geografia", phrase: "ISOLE CANARIE" },
+                { category: "Arte", phrase: "NOTTE STELLATA DI VAN GOGH" },
+                { category: "Animali", phrase: "CANE GATTO E CANARINO" },
+                { category: "Clima", phrase: "CAMBIAMENTO CLIMATICO" },
+            ];
+            
+            // --- Funzioni Principali di Gioco ---
+
+            function setupRound() {
+                const round = gameRounds[currentRoundIndex];
+                roundTitle.textContent = round.title;
+                roundDescription.textContent = round.description;
+                // Scegli ruota per round
+                if (round.type === 'FINALE') wheelSegments = wheelConfigs.FINALE;
+                else if (currentRoundIndex === 0) wheelSegments = wheelConfigs.ROUND1;
+                else wheelSegments = wheelConfigs.ROUND2;
+                createWheelSegments();
+                
+                // Scegli una frase casuale che non sia già stata usata
+                const availablePhrases = phrases.filter(p => !p.used);
+                const phraseData = availablePhrases[Math.floor(Math.random() * availablePhrases.length)];
+                phraseData.used = true; // Marca come usata
+                
+                currentPhrase = phraseData.phrase.toUpperCase();
+                categoryDisplay.textContent = `Categoria: ${phraseData.category}`;
+                
+                guessedLetters = [];
+                roundScores = [0, 0, 0];
+                allConsonantsRevealed = false;
+                renderPuzzleBoard();
+                updateKeyboard();
+                updateScores();
+                
+                // Per il round finale, si danno alcune lettere
+                if (round.type === 'FINALE') {
+                    // Logica speciale per il round finale, es. dare R, S, T, L, N, E
+                    ['R', 'S', 'T', 'L', 'N', 'E'].forEach(letter => {
+                        if (currentPhrase.includes(letter) && !guessedLetters.includes(letter)) {
+                            guessedLetters.push(letter);
+                        }
+                    });
+                    renderPuzzleBoard();
+                    showMessage("Round Finale! Hai 3 consonanti e 1 vocale.", false);
+                }
+
+                setGameState('SPIN');
+                const playerName = document.getElementById(`player-${currentPlayerIndex}-name`).value;
+                turnDisplay.textContent = playerName;
+            }
+            
+            function renderPuzzleBoard() {
+                puzzleBoard.innerHTML = '';
+                const rowsSpec = [12, 14, 14, 12];
+
+                // Helper: distribuisce le parole nelle righe senza spezzarle
+                function layoutPhraseIntoRows(phrase, rowsSpec) {
+                    const rows = rowsSpec.map(len => new Array(len).fill(null));
+                    const words = phrase.trim().split(/\s+/);
+                    let r = 0, c = 0;
+                    const maxRow = rowsSpec.length;
+
+                    for (let w = 0; w < words.length && r < maxRow; w++) {
+                        const word = words[w].toUpperCase();
+                        const rowLen = rowsSpec[r];
+                        const remaining = rowLen - c;
+                        const need = (c > 0 ? 1 : 0) + word.length; // spazio + parola se non inizio riga
+
+                        if (need > remaining) {
+                            // Vai a capo
+                            r++; c = 0;
+                            if (r >= maxRow) break;
+                        }
+
+                        // Se dopo andare a capo la parola comunque non entra nella riga (parole > 14)
+                        if (word.length > rowsSpec[r]) {
+                            // Inserisci quanto entra e continua (fallback raro)
+                            for (let i = 0; i < rowsSpec[r] && i < word.length; i++) {
+                                rows[r][i] = word[i];
+                            }
+                            // avanza al prossimo row per il resto della parola
+                            let consumed = rowsSpec[r];
+                            let remainChars = word.slice(consumed).split('');
+                            r++; c = 0;
+                            while (r < maxRow && remainChars.length) {
+                                const take = Math.min(rowsSpec[r], remainChars.length);
+                                for (let i = 0; i < take; i++) rows[r][i] = remainChars[i];
+                                remainChars = remainChars.slice(take);
+                                r++; c = 0;
+                            }
+                            // dopo split forzato passa alla prossima parola
+                            continue;
+                        }
+
+                        // Spazio tra parole se necessario
+                        if (c > 0) {
+                            rows[r][c] = ' ';
+                            c++;
+                        }
+                        // Inserisci la parola
+                        for (let i = 0; i < word.length && c < rowsSpec[r]; i++) {
+                            rows[r][c] = word[i];
+                            c++;
+                        }
+                    }
+                    return rows;
+                }
+
+                const layout = layoutPhraseIntoRows(currentPhrase, rowsSpec);
+
+                layout.forEach((cells, rIdx) => {
+                    const row = document.createElement('div');
+                    row.className = `puzzle-row row-${rIdx + 1}`;
+                    cells.forEach(char => {
+                        const letterBox = document.createElement('div');
+                        letterBox.className = 'letter-box';
+                        if (char === null || char === ' ') {
+                            letterBox.classList.add('space');
+                        } else {
+                            if (guessedLetters.includes(char)) {
+                                letterBox.textContent = char;
+                                letterBox.classList.add('revealed');
+                            } else {
+                                letterBox.textContent = '\u00A0';
+                            }
+                        }
+                        row.appendChild(letterBox);
+                    });
+                    puzzleBoard.appendChild(row);
+                });
+            }
+
+            function spinWheel() {
+                if (allConsonantsRevealed) {
+                    showMessage('Tutte le consonanti sono rivelate: compra vocali o risolvi.', true, 2200);
+                    return;
+                }
+                if (wheelSpinning) return;
+                setGameState('SPINNING');
+                wheelSpinning = true;
+
+                const numSegments = wheelSegments.length;
+                const segmentDegrees = 360 / numSegments;
+                // Precalcola l'esito e allinea il centro dello spicchio alle ore 6 (90° da +x)
+                const randomStopIndex = Math.floor(Math.random() * numSegments);
+                const targetCenter = (randomStopIndex + 0.5) * segmentDegrees; // da +x CCW
+                const desiredMod = (90 - targetCenter + 360) % 360; // per portarlo a ore 6
+                const base = ((currentWheelAngle % 360) + 360) % 360;
+                const needed = (desiredMod - base + 360) % 360;
+                const spins = 360 * 5; // giri completi per animazione
+                const stopAngle = currentWheelAngle + spins + needed;
+
+                wheel.style.transform = `rotate(${stopAngle}deg)`;
+
+                wheel.addEventListener('transitionend', () => {
+                    wheelSpinning = false;
+                    // Usa l'esito precalcolato
+                    const result = wheelSegments[randomStopIndex];
+                    handleSpinResult(result);
+                    currentWheelAngle = stopAngle;
+                }, { once: true });
+            }
+            
+            function handleSpinResult(result) {
+                showMessage(`La ruota si è fermata su: ${result}!`, true, 1600);
+                if (result === 'BANCA ROTTA') {
+                    roundScores[currentPlayerIndex] = 0; // azzera ORA
+                    updateScores();
+                    if (tryUseJolly('BANCA ROTTA')) {
+                        setTimeout(() => setGameState('SPIN'), 1600);
+                    } else {
+                        setTimeout(passTurn, 1600);
+                    }
+                } else if (result === 'PASSAMANO' || result === 'PERDI TURNO') { // supporta vecchio testo
+                    if (tryUseJolly('PASSAMANO')) {
+                        setTimeout(() => setGameState('SPIN'), 1600);
+                    } else {
+                        setTimeout(passTurn, 1600);
+                    }
+                } else if (result === 'JOLLY') {
+                    playerJolly[currentPlayerIndex]++;
+                    updateScores();
+                    setTimeout(() => setGameState('SPIN'), 1600);
+                } else {
+                    currentSpinValue = result;
+                    setGameState('GUESS_CONSONANT');
+                }
+            }
+            
+            function checkLetter(letter, value) {
+                if (guessedLetters.includes(letter)) return; // Non dovrebbe succedere con la UI disabilitata
+
+                guessedLetters.push(letter);
+                updateKeyboard();
+                const count = currentPhrase.split(letter).length - 1;
+
+                if (count > 0) {
+                    showMessage(`Trovata! Ci sono ${count} "${letter}".`, true, 2000);
+                    if (value) { // Se è una consonante con valore
+                        roundScores[currentPlayerIndex] += count * value;
+                    }
+                    renderPuzzleBoard();
+                    updateScores();
+                    evaluateConsonantsLeft();
+                    
+                    // Dopo una lettera corretta, il giocatore può continuare
+                    setTimeout(() => {
+                        if (!checkWinCondition()) {
+                            if (!allConsonantsRevealed) setGameState('SPIN');
+                            else {
+                                showMessage('Consonanti finite: compra vocali o risolvi.', true, 1800);
+                                setGameState('ONLY_VOWELS');
+                            }
+                        }
+                    }, 2000);
+                } else {
+                    showMessage(`La lettera "${letter}" non c'è.`, true, 2000);
+                    if (tryUseJolly('LETTERA ERRATA')) {
+                        setTimeout(() => setGameState('SPIN'), 2000);
+                    } else {
+                        setTimeout(passTurn, 2000);
+                    }
+                }
+            }
+            
+            function passTurn() {
+                currentPlayerIndex = (currentPlayerIndex + 1) % playerScores.length;
+                const playerName = document.getElementById(`player-${currentPlayerIndex}-name`).value;
+                turnDisplay.textContent = playerName;
+                showMessage(`Ora è il turno di ${playerName}`, true, 1500);
+                setGameState('SPIN');
+            }
+            
+            function checkWinCondition() {
+                const phraseLetters = [...new Set(currentPhrase.replace(/[^A-Z]/g, ''))];
+                const allGuessed = phraseLetters.every(letter => guessedLetters.includes(letter));
+                if (allGuessed) {
+                    endRound();
+                    return true;
+                }
+                return false;
+            }
+
+            function endRound() {
+                setGameState('ROUND_OVER');
+                playerScores[currentPlayerIndex] += roundScores[currentPlayerIndex];
+                updateScores();
+                const playerName = document.getElementById(`player-${currentPlayerIndex}-name`).value;
+                showMessage(`Round completato! ${playerName} vince il montepremi del round!`, false);
+                nextRoundBtn.style.display = 'block';
+            }
+            
+            // --- Funzioni UI e Stato ---
+            
+            function setGameState(newState) {
+                gameState = newState;
+                updateUI();
+            }
+
+            function updateUI() {
+                // Gestione pulsanti principali
+                const canSpin = gameState === 'SPIN' && !wheelSpinning && !allConsonantsRevealed;
+                spinBtn.disabled = !canSpin;
+                buyVowelBtn.disabled = !['SPIN','ONLY_VOWELS','BUY_VOWEL'].includes(gameState) || roundScores[currentPlayerIndex] < 250;
+                solveBtn.disabled = !['SPIN','ONLY_VOWELS'].includes(gameState);
+
+                // Gestione tastiera
+                updateKeyboard();
+
+                 // Gestione UI round finale
+                if (gameRounds[currentRoundIndex].type === 'FINALE') {
+                    spinBtn.style.display = 'none';
+                    buyVowelBtn.style.display = 'none';
+                } else {
+                    spinBtn.style.display = 'block';
+                    buyVowelBtn.style.display = 'block';
+                }
+            }
+
+            function createKeyboard() {
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                letters.split('').forEach(letter => {
+                    const key = document.createElement('button');
+                    key.className = 'key';
+                    key.textContent = letter;
+                    key.dataset.key = letter;
+                    key.addEventListener('click', () => handleKeyPress(letter));
+                    keyboardContainer.appendChild(key);
+                });
+            }
+
+        function updateKeyboard() {
+                const keys = keyboardContainer.querySelectorAll('.key');
+                keys.forEach(key => {
+                    const letter = key.dataset.key;
+                    let disabled = true;
+
+                    if (guessedLetters.includes(letter)) {
+                        disabled = true;
+            } else if (gameState === 'GUESS_CONSONANT' && CONSONANTS.includes(letter)) {
+                        disabled = false;
+            } else if ((gameState === 'BUY_VOWEL' || gameState === 'ONLY_VOWELS') && VOWELS.includes(letter)) {
+                        disabled = false;
+                    }
+                    
+                    key.disabled = disabled;
+                });
+            }
+            
+            function handleKeyPress(letter) {
+                if (gameState === 'GUESS_CONSONANT') {
+                    checkLetter(letter, currentSpinValue);
+                } else if (gameState === 'BUY_VOWEL' || gameState === 'ONLY_VOWELS') {
+                    if (roundScores[currentPlayerIndex] >= 250) {
+                        roundScores[currentPlayerIndex] -= 250;
+                        updateScores();
+                        checkLetter(letter, null);
+                        setGameState('SPIN');
+                    } else {
+                        showMessage('Fondi insufficienti per vocale.', true, 1600);
+                    }
+                }
+            }
+
+            function updateScores() {
+                for (let i=0;i<playerScores.length;i++) {
+                    const totEl = document.getElementById(`tot-${i}`);
+                    const oraEl = document.getElementById(`ora-${i}`);
+                    const jEl = document.getElementById(`jolly-${i}`);
+                    if (totEl) totEl.textContent = `€${playerScores[i]}`;
+                    if (oraEl) oraEl.textContent = `€${roundScores[i]}`;
+                    if (jEl) jEl.textContent = playerJolly[i];
+                }
+            }
+
+            function tryUseJolly(reason) {
+                if (playerJolly[currentPlayerIndex] > 0) {
+                    playerJolly[currentPlayerIndex]--;
+                    updateScores();
+                    showMessage(`Usi un Jolly (${reason}) e mantieni il turno.`, true, 1700);
+                    return true;
+                }
+                return false;
+            }
+
+            function evaluateConsonantsLeft() {
+                const consonantsInPhrase = [...new Set(currentPhrase.replace(/[^A-Z]/g,'').split('').filter(ch => CONSONANTS.includes(ch)))];
+                allConsonantsRevealed = consonantsInPhrase.every(c => guessedLetters.includes(c));
+                if (allConsonantsRevealed) {
+                    setGameState('ONLY_VOWELS');
+                }
+            }
+
+            function showMessage(text, autoHide = true, duration = 2000) {
+                messageText.textContent = text;
+                messageOverlay.style.display = 'flex';
+                solveInputBox.style.display = 'none';
+                closeMessageBtn.style.display = autoHide ? 'none' : 'block';
+                
+                if (autoHide) {
+                    setTimeout(hideMessage, duration);
+                }
+            }
+
+            function hideMessage() {
+                messageOverlay.style.display = 'none';
+            }
+            
+            // --- Event Listeners ---
+
+            spinBtn.addEventListener('click', spinWheel);
+            
+            buyVowelBtn.addEventListener('click', () => {
+                if (roundScores[currentPlayerIndex] >= 250) {
+                    setGameState('BUY_VOWEL');
+                } else {
+                    showMessage("Non hai abbastanza soldi!", true, 2000);
+                }
+            });
+            
+            solveBtn.addEventListener('click', () => {
+                setGameState('SOLVE');
+                showMessage("Risolvi la frase!", false);
+                solveInputBox.style.display = 'flex';
+                closeMessageBtn.style.display = 'none';
+            });
+            
+            submitSolveBtn.addEventListener('click', () => {
+                const solution = solveInput.value.trim().toUpperCase();
+                if (solution === currentPhrase) {
+                    // Rivela tutte le lettere per l'effetto visivo
+                    const allLetters = [...new Set(currentPhrase.replace(/[^A-Z]/g, ''))];
+                    allLetters.forEach(l => {
+                        if (!guessedLetters.includes(l)) guessedLetters.push(l);
+                    });
+                    renderPuzzleBoard();
+                    hideMessage();
+                    endRound();
+                } else {
+                    hideMessage();
+                    showMessage("Soluzione sbagliata!", true, 2000);
+                    if (tryUseJolly('SOLUZIONE ERRATA')) {
+                        setTimeout(() => setGameState('SPIN'), 2000);
+                    } else {
+                        setTimeout(passTurn, 2000);
+                    }
+                }
+                solveInput.value = '';
+            });
+
+            nextRoundBtn.addEventListener('click', () => {
+                currentRoundIndex++;
+                nextRoundBtn.style.display = 'none';
+                if (currentRoundIndex < gameRounds.length) {
+                    setupRound();
+                } else {
+                    // Determina il vincitore finale
+                    let maxScore = Math.max(...playerScores);
+                    let winners = playerScores.map((score, index) => score === maxScore ? index : -1).filter(i => i !== -1);
+                    let message;
+                    if (winners.length === 1) {
+                        const winnerName = document.getElementById(`player-${winners[0]}-name`).value;
+                        message = `Il gioco è finito! Il vincitore è ${winnerName} con €${maxScore}!`;
+                    } else {
+                        message = `Il gioco è finito in pareggio con €${maxScore}!`;
+                    }
+                    showMessage(message, false);
+                }
+            });
+
+            closeMessageBtn.addEventListener('click', hideMessage);
+
+            // --- Inizializzazione ---
+            createKeyboard();
+            createWheelSegments();
+            setupRound();
+        });
+    </script>
+</body>
+</html>
+
+
+
+

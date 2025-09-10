@@ -1,0 +1,122 @@
+{
+  "Latino": [
+    "Carpe diem, il tempo è oro",
+    "Homo homini lupus est",
+    "Alea iacta est",
+    "Il senato romano è un'assemblea di saggi",
+    "Un poeta epico racconta grandi gesta",
+    "Il circo massimo è una gara di bighe",
+    "Il ponte di Caligola",
+    "Giulio Cesare supera il Rubicone",
+    "Roma caput mundi",
+    "Il tempio di Giove in Campidoglio"
+  ],
+  "Greco Antico": [
+    "Conosci te stesso, è l'arte più grande",
+    "Un atleta corre per la gloria",
+    "La polis greca è una città-stato",
+    "Le Olimpiadi antiche",
+    "La lira di Orfeo",
+    "L'odissea di Ulisse è un lungo viaggio",
+    "Socrate e la filosofia in piazza",
+    "La tragedia di Edipo re",
+    "Le gesta di Achille nell'Iliade",
+    "Il mito di Icaro e le sue ali"
+  ],
+  "Storia Antica": [
+    "La guerra del Peloponneso",
+    "Alessandro Magno conquista l'Oriente",
+    "La caduta di Troia",
+    "L'antica Roma costruisce acquedotti",
+    "L'assedio di Siracusa",
+    "La morte di Cleopatra",
+    "I sette re di Roma",
+    "L'eruzione del Vesuvio",
+    "La battaglia di Canne",
+    "La via Appia unisce Roma al sud"
+  ],
+  "Filosofia": [
+    "Il dubbio è il primo passo",
+    "L'ombra nella caverna",
+    "La ragione è la virtù più alta",
+    "Il bene supremo è la felicità",
+    "Socrate e il suo demone interiore",
+    "L'etica di Aristotele",
+    "La teoria delle idee di Platone",
+    "La maieutica è l'arte di partorire idee",
+    "Il cinismo è la filosofia del disprezzo",
+    "La logica di Aristotele"
+  ],
+  "Letteratura Italiana": [
+    "La lingua di Dante Alighieri",
+    "Il sonetto di Petrarca a Laura",
+    "La commedia divina",
+    "La penna di Manzoni",
+    "I promessi sposi",
+    "Un romanzo di Italo Calvino",
+    "Leopardi canta l'infinito",
+    "La fontana di Trevi",
+    "I canti di Giacomo Leopardi",
+    "Il Decameron di Boccaccio"
+  ],
+  "Scienze": [
+    "La fotosintesi clorofilliana",
+    "La cellula è un'unità vivente",
+    "La gravità di Newton",
+    "Il sistema solare",
+    "Il DNA è la molecola della vita",
+    "Le tre leggi della dinamica",
+    "Il ciclo dell'acqua",
+    "La chimica dei composti organici",
+    "L'energia cinetica",
+    "La struttura di un atomo"
+  ],
+  "Matematica": [
+    "La radice quadrata di un numero",
+    "La teoria di Pitagora",
+    "Il teorema di Euclide",
+    "La somma degli angoli interni di un triangolo",
+    "L'algebra risolve equazioni",
+    "La geometria degli spazi infiniti",
+    "I numeri primi",
+    "Il cerchio ha un'area e una circonferenza",
+    "Il calcolo integrale",
+    "La successione di Fibonacci"
+  ],
+  "Arte": [
+    "La Venere di Milo",
+    "La scultura di Canova",
+    "La Pietà di Michelangelo",
+    "Il David di Donatello",
+    "L'architettura classica",
+    "La Gioconda di Leonardo da Vinci",
+    "Il Partenone sull'acropoli di Atene",
+    "Le opere di Caravaggio",
+    "Un dipinto di Raffaello Sanzio",
+    "La scuola di Atene"
+  ],
+  "Geografia": [
+    "Il fiume Gange in India",
+    "La catena delle Ande",
+    "Il Monte Fuji in Giappone",
+    "Il deserto di Gobi in Mongolia",
+    "Le isole Hawaii",
+    "Lo stretto di Gibilterra",
+    "Il continente africano",
+    "Il mar Morto",
+    "Il fiume Po attraversa l'Italia",
+    "Il lago di Garda"
+  ],
+  "Proverbi e Aforismi": [
+    "Mens sana in corpore sano",
+    "Vae victis",
+    "I più dotti sono i più modesti",
+    "La speranza è l'ultima a morire",
+    "Il coraggio è il primo passo",
+    "La fortuna aiuta gli audaci",
+    "Chi semina vento raccoglie tempesta",
+    "La pazienza è la virtù dei forti",
+    "L'occhio vuole la sua parte",
+    "Nessun traguardo è irraggiungibile"
+  ]
+}

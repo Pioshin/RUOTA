@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Ruota della Fortuna</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pointer-color: #facc15; /* yellow-400 */
+            --neon-glow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00c1, 0 0 30px #ff00c1, 0 0 40px #ff00c1, 0 0 50px #ff00c1, 0 0 60px #ff00c1;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+
+        /* Contenitore principale per centrare la ruota */
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        /* Contenitore della ruota, gestisce il clipping su schermi piccoli */
+        #wheel-container {
+            position: relative;
+            width: 90vmin;
+            height: 90vmin;
+            max-width: 700px;
+            max-height: 700px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease-in-out;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Freccetta fissa che indica lo spicchio - SPOSTATA IN BASSO */
+        #pointer {
+            position: absolute;
+            bottom: -10px; /* Posizionata leggermente sotto il centro */
+            left: 50%;
+            transform: translateX(-50%) rotate(180deg); /* Ruotata per puntare in alto */
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-top: 40px solid var(--pointer-color);
+            z-index: 10;
+            filter: drop-shadow(0 -2px 4px rgba(0,0,0,0.5));
+            transition: transform 0.1s ease-out;
+        }
+        
+        /* Animazione di oscillazione per la freccetta */
+        @keyframes wobble {
+            0%, 100% { transform: translateX(-50%) rotate(180deg); }
+            25% { transform: translateX(-50%) rotate(170deg); }
+            75% { transform: translateX(-50%) rotate(190deg); }
+        }
+
+        .wobble {
+            animation: wobble 0.15s ease-in-out;
+        }
+
+        /* Stile del pulsante per girare la ruota */
+        #spinButton {
+            margin-top: 2rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            background: linear-gradient(45deg, #facc15, #fbbf24);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(251, 191, 36, 0.4);
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+        }
+
+        #spinButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.6);
+        }
+
+        #spinButton:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: scale(1);
+        }
+
+        /* Stile per il popup del risultato */
+        #popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 100;
+        }
+
+        #popup.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #popup-content {
+            padding: 3rem 4rem;
+            background-color: #1a1a2e;
+            border: 4px solid #ff00c1;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: var(--neon-glow);
+            transform: scale(0.5);
+            transition: transform 0.3s ease-out;
+        }
+
+        #popup.show #popup-content {
+            transform: scale(1);
+        }
+
+        #popup-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 1rem;
+        }
+
+        #popup-result {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #facc15;
+            text-shadow: 0 0 5px #facc15, 0 0 10px #facc15;
+        }
+        
+        /* Stile per il risultato mostrato in basso */
+        #result-display {
+            position: absolute;
+            bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            background-color: rgba(0,0,0,0.5);
+            padding: 0.5rem 1.5rem;
+            border-radius: 1rem;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* Gestione della responsività */
+        @media (max-width: 768px) {
+            #wheel-container {
+                width: 120vmin;
+                height: 120vmin;
+                margin-bottom: -30vmin; /* Sposta la ruota in giù */
+                border-radius: 50%;
+                overflow: hidden;
+                box-shadow: 0 0 30px rgba(0,0,0,0.7) inset;
+            }
+            #pointer {
+                /* Aggiorna la posizione per la vista ritagliata */
+                bottom: calc(30vmin - 20px); 
+            }
+            #spinButton {
+                /* Sposta il bottone in alto per non sovrapporlo */
+                order: -1;
+                margin-bottom: 1rem;
+                margin-top: 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #wheel-container {
+                height: 100vmin;
+                margin-bottom: -50vmin;
+            }
+            #pointer {
+                 bottom: calc(50vmin - 20px);
+            }
+        }
+
+    </style>
+</head>
+<body class="overflow-hidden">
+
+    <div id="game-container">
+        <div id="wheel-container">
+            <canvas id="wheelCanvas"></canvas>
+            <div id="pointer"></div>
+        </div>
+
+        <button id="spinButton">Gira!</button>
+        
+        <div id="result-display"></div>
+    </div>
+
+    <div id="popup">
+        <div id="popup-content">
+            <p id="popup-title">Hai ottenuto:</p>
+            <p id="popup-result"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURAZIONE E DATI DELLA RUOTA ---
+        const wheelData = [
+            { label: '500€', color: '#f87171' }, { label: 'PASSAMANO', color: '#fb923c' },
+            { label: '200€', color: '#facc15' }, { label: '700€', color: '#a3e635' },
+            { label: 'JOLLY', color: '#4ade80' }, { label: '300€', color: '#34d399' },
+            { label: 'BANCAROTTA', color: '#2dd4bf' }, { label: '800€', color: '#22d3ee' },
+            { label: '100€', color: '#38bdf8' }, { label: '600€', color: '#60a5fa' },
+            { label: '400€', color: '#818cf8' }, { label: '900€', color: '#a78bfa' },
+            { label: '250€', color: '#c084fc' }, { label: 'PASSAMANO', color: '#e879f9' },
+            { label: '550€', color: '#f472b6' }, { label: 'JOLLY', color: '#fb7185' },
+            { label: '1000€', color: '#f87171' }, { label: '150€', color: '#fb923c' },
+            { label: 'BANCAROTTA', color: '#facc15' }, { label: '750€', color: '#a3e635' },
+            { label: '350€', color: '#4ade80' }, { label: 'PASSAMANO', color: '#34d399' },
+            { label: '850€', color: '#2dd4bf' }, { label: '450€', color: '#22d3ee' },
+        ];
+        
+        const numSlices = wheelData.length;
+        const sliceDegrees = 360 / numSlices;
+        const sliceRadians = (2 * Math.PI) / numSlices;
+
+        // --- RIFERIMENTI AGLI ELEMENTI DEL DOM ---
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinButton = document.getElementById('spinButton');
+        const pointer = document.getElementById('pointer');
+        const resultDisplay = document.getElementById('result-display');
+        const popup = document.getElementById('popup');
+        const popupResult = document.getElementById('popup-result');
+
+        // --- STATO DEL GIOCO E ANIMAZIONE ---
+        let currentAngleDegrees = 0;
+        let isSpinning = false;
+        let lastTickIndex = -1;
+        
+        let animationStartTime;
+        const animationDuration = 6000; // Durata in ms
+        let startRotationAngle = 0;
+        let targetRotationAngle = 0;
+        let winningIndex = 0;
+
+        // --- GESTIONE AUDIO ---
+        let audioCtx;
+        function playTick() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.05);
+            pointer.classList.remove('wobble');
+            void pointer.offsetWidth;
+            pointer.classList.add('wobble');
+        }
+
+        // --- FUNZIONI DI DISEGNO SUL CANVAS ---
+        function drawWheel() {
+            const currentAngleRadians = currentAngleDegrees * Math.PI / 180;
+            const radius = canvas.width / 2;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.rotate(currentAngleRadians);
+            ctx.translate(-radius, -radius);
+            
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "rgba(0,0,0,0.5)";
+
+            for (let i = 0; i < numSlices; i++) {
+                const angle = i * sliceRadians;
+                
+                ctx.beginPath();
+                ctx.fillStyle = wheelData[i].color;
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius * 0.9, angle, angle + sliceRadians);
+                ctx.lineTo(radius, radius);
+                ctx.fill();
+
+                const pegAngle = angle;
+                const pegX = radius + Math.cos(pegAngle) * radius * 0.92;
+                const pegY = radius + Math.sin(pegAngle) * radius * 0.92;
+                ctx.beginPath();
+                ctx.fillStyle = '#ffffff';
+                ctx.arc(pegX, pegY, radius * 0.02, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(angle + sliceRadians / 2);
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#1a1a2e";
+                ctx.font = `bold ${radius * 0.07}px Poppins`;
+                
+                const text = wheelData[i].label;
+                const charSpacing = radius * 0.08;
+                for (let j = 0; j < text.length; j++) {
+                    ctx.fillText(text[j], 0, -radius * 0.7 + (j * charSpacing));
+                }
+                ctx.restore();
+            }
+            
+            ctx.restore();
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.fillStyle = '#e0e0e0';
+            ctx.arc(radius, radius, radius * 0.15, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.fillStyle = '#1a1a2e';
+            ctx.arc(radius, radius, radius * 0.12, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        // --- LOOP DI ANIMAZIONE ---
+        function easeOutQuint(t) {
+            return 1 + (--t) * t * t * t * t;
+        }
+
+        function animate(timestamp) {
+            if (!animationStartTime) animationStartTime = timestamp;
+            const elapsedTime = timestamp - animationStartTime;
+
+            if (elapsedTime >= animationDuration) {
+                currentAngleDegrees = targetRotationAngle;
+                drawWheel();
+                isSpinning = false;
+                spinButton.disabled = false;
+                determineWinner();
+                return;
+            }
+
+            const progress = elapsedTime / animationDuration;
+            const easedProgress = easeOutQuint(progress);
+            currentAngleDegrees = startRotationAngle + (targetRotationAngle - startRotationAngle) * easedProgress;
+            
+            const pointerAngleDegrees = 90; // Freccetta in basso
+            const normalizedAngle = (currentAngleDegrees % 360 + 360) % 360;
+            const currentTickIndex = Math.floor(((pointerAngleDegrees - normalizedAngle + 360) % 360) / sliceDegrees);
+
+            if (currentTickIndex !== lastTickIndex && isSpinning) {
+                playTick();
+                lastTickIndex = currentTickIndex;
+            }
+
+            drawWheel();
+            requestAnimationFrame(animate);
+        }
+
+        // --- LOGICA DEL GIOCO ---
+        function spin() {
+            if (isSpinning) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            isSpinning = true;
+            spinButton.disabled = true;
+            resultDisplay.style.opacity = '0';
+            popup.classList.remove('show');
+            
+            winningIndex = Math.floor(Math.random() * numSlices);
+            
+            const targetCenter = (winningIndex + 0.5) * sliceDegrees;
+            
+            // La freccetta è in basso, a 90 gradi.
+            const pointerTargetDegrees = 90; 
+            const desiredMod = (pointerTargetDegrees - targetCenter + 360) % 360;
+            
+            const base = ((currentAngleDegrees % 360) + 360) % 360;
+            const needed = (desiredMod - base + 360) % 360;
+            const spins = 360 * (Math.floor(Math.random() * 3) + 4); 
+            
+            startRotationAngle = currentAngleDegrees;
+            targetRotationAngle = currentAngleDegrees + spins + needed;
+
+            animationStartTime = null;
+            lastTickIndex = -1;
+            requestAnimationFrame(animate);
+        }
+        
+        function determineWinner() {
+            const winner = wheelData[winningIndex];
+            resultDisplay.textContent = `Risultato: ${winner.label}`;
+            resultDisplay.style.opacity = '1';
+            popupResult.textContent = winner.label;
+            setTimeout(() => { popup.classList.add('show'); }, 500);
+            
+            currentAngleDegrees = targetRotationAngle % 360;
+        }
+
+        // --- GESTIONE DELLA RESPONSIVITÀ ---
+        function handleResize() {
+            const container = document.getElementById('wheel-container');
+            const size = Math.min(container.clientWidth, container.clientHeight);
+            canvas.width = size;
+            canvas.height = size;
+            drawWheel();
+        }
+
+        // --- EVENT LISTENERS ---
+        spinButton.addEventListener('click', spin);
+        popup.addEventListener('click', () => popup.classList.remove('show'));
+        window.addEventListener('resize', handleResize);
+
+        // --- INIZIALIZZAZIONE ---
+        handleResize();
+
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruota della Fortuna</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1f2937, #4b5563);
+            font-family: 'Luckiest Guy', cursive;
+            color: white;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.2, 0.9, 0.3, 1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .wheel-center {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            border: 8px solid #1f2937;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        .segment-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            text-align: center;
+            transform: translateY(-50%) rotate(90deg) translateX(40px);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+            color: black;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 30px solid #ef4444;
+            z-index: 3;
+        }
+        
+        #spin-button {
+            padding: 15px 30px;
+            font-size: 24px;
+            font-family: 'Luckiest Guy', cursive;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(to bottom, #d97706, #b45309);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            border-bottom: 4px solid #92400e;
+        }
+
+        #spin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #spin-button:active {
+            transform: translateY(2px);
+            border-bottom: 2px solid #92400e;
+        }
+
+        /* Colori per gli spicchi */
+        .color-0 { background-color: #fca5a5; }
+        .color-1 { background-color: #fcd34d; }
+        .color-2 { background-color: #fde047; }
+        .color-3 { background-color: #bef264; }
+        .color-4 { background-color: #86efac; }
+        .color-5 { background-color: #6ee7b7; }
+        .color-6 { background-color: #67e8f9; }
+        .color-7 { background-color: #7dd3fc; }
+        .color-8 { background-color: #93c5fd; }
+        .color-9 { background-color: #a5b4fc; }
+        .color-10 { background-color: #c4b5fd; }
+        .color-11 { background-color: #d8b4fe; }
+        .color-12 { background-color: #f0abfc; }
+        .color-13 { background-color: #fca5a5; }
+        .color-14 { background-color: #fcd34d; }
+        .color-15 { background-color: #fde047; }
+        .color-16 { background-color: #bef264; }
+        .color-17 { background-color: #86efac; }
+        .color-18 { background-color: #6ee7b7; }
+        .color-19 { background-color: #67e8f9; }
+        .color-20 { background-color: #7dd3fc; }
+        .color-21 { background-color: #93c5fd; }
+        .color-22 { background-color: #a5b4fc; }
+        .color-23 { background-color: #c4b5fd; }
+    </style>
+</head>
+<body>
+
+    <div class="wheel-container">
+        <div class="wheel" id="wheel">
+            <!-- Gli spicchi verranno generati dinamicamente da JavaScript -->
+        </div>
+        <div class="wheel-center">Start</div>
+        <div class="pointer"></div>
+    </div>
+    <button id="spin-button">Gira la Ruota!</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const wheel = document.getElementById('wheel');
+            const spinButton = document.getElementById('spin-button');
+            const segments = [
+                "1000 €", "2000 €", "1500 €", "500 €", "BANCAROTTA", "4000 €", "500 €", "250 €", "1000 €", "PASSA",
+                "500 €", "2500 €", "2000 €", "1500 €", "500 €", "BANCAROTTA", "2000 €", "500 €", "PASSA", "250 €",
+                "500 €", "2000 €", "1000 €", "3000 €"
+            ];
+            const numSegments = segments.length;
+            const segmentAngle = 360 / numSegments;
+            let currentRotation = 0; // Nuova variabile per tenere traccia della rotazione totale
+
+            // Funzione per creare gli spicchi
+            function createSegments() {
+                segments.forEach((value, index) => {
+                    const segment = document.createElement('div');
+                    segment.className = `segment color-${index % 24}`;
+                    segment.style.transform = `rotate(${index * segmentAngle}deg) skewY(-${90 - segmentAngle}deg)`;
+                    
+                    const content = document.createElement('div');
+                    content.className = 'segment-content';
+                    content.textContent = value;
+                    content.style.transform = `rotate(${90 - segmentAngle}deg) skewY(${90 - segmentAngle}deg) translateX(50%)`;
+                    
+                    segment.appendChild(content);
+                    wheel.appendChild(segment);
+                });
+            }
+
+            createSegments();
+
+            let spinning = false;
+
+            spinButton.addEventListener('click', () => {
+                if (spinning) return;
+                spinning = true;
+                
+                // Genera un angolo di rotazione casuale
+                const randomDegrees = Math.floor(Math.random() * 360) + 360 * 10;
+                
+                // Calcoliamo l'angolo finale in base al valore casuale
+                const finalRotation = randomDegrees + 360 - (randomDegrees % segmentAngle);
+                
+                // Aggiorniamo la rotazione totale e la applichiamo
+                currentRotation += finalRotation;
+                wheel.style.transform = `rotate(${currentRotation}deg)`;
+                
+                // Rimuovi il listener di transizione precedente se esiste
+                wheel.removeEventListener('transitionend', onTransitionEnd);
+
+                // Aggiungi un listener per quando la transizione finisce
+                wheel.addEventListener('transitionend', onTransitionEnd);
+            });
+            
+            function onTransitionEnd() {
+                spinning = false;
+                // Calcola l'indice dello spicchio su cui si è fermata la ruota
+                const normalizedRotation = currentRotation % 360; // Normalizza l'angolo totale tra 0 e 360
+                
+                const segmentIndex = Math.floor((360 - normalizedRotation) / segmentAngle);
+                const winningSegment = segments[segmentIndex];
+
+                console.log(`Ti sei fermato su: ${winningSegment}`);
+            }
+        });
+    </script>
+
+</body>
+</html>

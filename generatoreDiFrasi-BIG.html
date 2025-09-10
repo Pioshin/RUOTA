@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore di Frasi per Tabellone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1a202c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            width: 90%;
+            max-width: 900px;
+        }
+        .board-container {
+            background-color: #3b0764; /* Colore viola scuro del tabellone */
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 4px solid #f06292; /* Colore rosa dei bordi */
+            width: 100%;
+        }
+        .grid-board {
+            display: grid;
+            grid-template-columns: repeat(14, 1fr);
+            gap: 8px;
+            background-color: #3b0764;
+            border-radius: 12px;
+            width: 100%;
+        }
+        .cell {
+            aspect-ratio: 1 / 1; /* Mantiene le caselle quadrate */
+            background-color: #f0f4f8; /* Colore chiaro per le caselle vuote */
+            border: 2px solid #94a3b8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: clamp(0.75rem, 4vw, 2.25rem);
+            color: #1a202c;
+            border-radius: 8px;
+            transition: transform 0.2s ease-in-out;
+        }
+        .cell.filled {
+            background-color: #c084fc; /* Colore viola chiaro per le caselle riempite */
+            color: #ffffff;
+            border-color: #a855f7;
+        }
+        .cell.filled.highlight {
+            background-color: #f06292;
+            animation: highlight-animation 1.5s ease-in-out forwards;
+        }
+        .cell.spacer {
+            background-color: transparent;
+            border: none;
+        }
+        @keyframes highlight-animation {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .button-primary {
+            background: linear-gradient(45deg, #f06292, #c084fc);
+            color: white;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 9999px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .topic-title {
+            background-color: transparent;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: bold;
+            text-align: center;
+            color: #1a202c;
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col justify-center items-center h-screen p-4">
+
+    <div class="container">
+        <h1 id="topic-display" class="topic-title"></h1>
+        
+        <div class="board-container">
+            <div id="board" class="grid-board">
+                <!-- Le caselle verranno generate dal JavaScript -->
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="generate-button" class="button-primary">Genera Nuova Frase</button>
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const boardElement = document.getElementById('board');
+        const generateButton = document.getElementById('generate-button');
+        const topicTextElement = document.getElementById('topic-display');
+        const BOARD_ROWS = 4;
+        const BOARD_COLS = 14;
+        const MAX_CELLS = 52; // 12 + 14 + 14 + 12
+
+        // Dichiariamo la variabile a livello globale, sarà popolata dal JSON o dal database di fallback
+        let phrasesByTopic = {};
+
+        // Questo è il database di frasi di fallback (piano B)
+        const fallbackPhrases = {
+            "Tecnologia": [
+                "Il software è l'architettura dei nostri sogni digitali",
+                "La rete globale connette menti e cuori",
+                "L'intelligenza artificiale apprende dal passato e crea il futuro"
+            ],
+            "Fantascienza": [
+                "Le stelle ci attendono con nuove avventure",
+                "I viaggi interstellari sono l'eredità dell'umanità",
+                "La gravità è solo una sfida per i coraggiosi"
+            ],
+            "Natura": [
+                "Il vento sussurra antiche storie agli alberi",
+                "Il mare canta una canzone senza tempo",
+                "I fiori sono i sorrisi della terra"
+            ]
+        };
+
+        // Funzione per generare le celle del tabellone
+        const generateBoard = () => {
+            boardElement.innerHTML = '';
+            boardElement.style.gridTemplateRows = `repeat(${BOARD_ROWS}, auto)`;
+            for (let i = 0; i < BOARD_ROWS; i++) {
+                const rowContainer = document.createElement('div');
+                rowContainer.style.display = 'contents';
+                
+                if (i === 0 || i === BOARD_ROWS - 1) { // Prima e ultima riga
+                    const spacerCellStart = document.createElement('div');
+                    spacerCellStart.classList.add('cell', 'spacer');
+                    rowContainer.appendChild(spacerCellStart);
+
+                    for (let j = 0; j < BOARD_COLS - 2; j++) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('cell');
+                        rowContainer.appendChild(cell);
+                    }
+
+                    const spacerCellEnd = document.createElement('div');
+                    spacerCellEnd.classList.add('cell', 'spacer');
+                    rowContainer.appendChild(spacerCellEnd);
+                } else { // Righe centrali
+                    for (let j = 0; j < BOARD_COLS; j++) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('cell');
+                        rowContainer.appendChild(cell);
+                    }
+                }
+                boardElement.appendChild(rowContainer);
+            }
+        };
+
+        // Funzione per riempire il tabellone con una frase
+        const fillBoard = (phrase) => {
+            const words = phrase.split(' ');
+            const cells = document.querySelectorAll('.cell:not(.spacer)');
+            
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('filled', 'highlight');
+            });
+
+            const rowStarts = [0, 12, 26, 40];
+            const rowWidths = [12, 14, 14, 12];
+            let cellIndex = 0;
+            let wordIndex = 0;
+
+            while (wordIndex < words.length && cellIndex < cells.length) {
+                const word = words[wordIndex];
+                const wordLength = word.length;
+                
+                let currentRow = 0;
+                if (cellIndex >= 12 && cellIndex < 26) currentRow = 1;
+                else if (cellIndex >= 26 && cellIndex < 40) currentRow = 2;
+                else if (cellIndex >= 40) currentRow = 3;
+
+                const startOfCurrentRow = rowStarts[currentRow];
+                const cellsInCurrentRow = rowWidths[currentRow];
+                const charsOnRow = cellIndex - startOfCurrentRow;
+                
+                const spaceNeeded = (charsOnRow > 0) ? wordLength + 1 : wordLength;
+
+                if (charsOnRow + spaceNeeded > cellsInCurrentRow) {
+                    cellIndex = startOfCurrentRow + cellsInCurrentRow;
+                    if (cellIndex >= cells.length) break;
+                    continue;
+                }
+
+                for (const char of word) {
+                    if (cellIndex >= cells.length) break;
+                    
+                    if (char.match(/[a-zA-ZàèéìòùÀÈÉÌÒÙ]/)) {
+                        cells[cellIndex].textContent = char.toUpperCase();
+                        cells[cellIndex].classList.add('filled');
+                    } else {
+                        cells[cellIndex].textContent = '';
+                        cells[cellIndex].classList.remove('filled');
+                    }
+                    cellIndex++;
+                }
+
+                if (wordIndex < words.length - 1) {
+                    if (cellIndex < cells.length && (cellIndex - rowStarts[currentRow]) < cellsInCurrentRow) {
+                         cells[cellIndex].textContent = '';
+                         cells[cellIndex].classList.remove('filled');
+                         cellIndex++;
+                    }
+                }
+
+                wordIndex++;
+            }
+            
+            let filledCells = document.querySelectorAll('.cell.filled');
+            filledCells.forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.classList.add('highlight');
+                }, index * 20);
+            });
+        };
+
+        // Funzione per selezionare una frase valida
+        const selectValidPhrase = () => {
+            const topics = Object.keys(phrasesByTopic);
+            let phrasesToTry = [];
+            
+            for (const topic of topics) {
+                phrasesToTry.push(...phrasesByTopic[topic].map(phrase => ({ topic, phrase })));
+            }
+
+            while (phrasesToTry.length > 0) {
+                const randomIndex = Math.floor(Math.random() * phrasesToTry.length);
+                const selected = phrasesToTry.splice(randomIndex, 1)[0];
+                const randomTopic = selected.topic;
+                const randomPhrase = selected.phrase;
+
+                const words = randomPhrase.split(' ');
+                let tempCellIndex = 0;
+                let isValid = true;
+                const rowStarts = [0, 12, 26, 40];
+                const rowWidths = [12, 14, 14, 12];
+                
+                for (const word of words) {
+                    const wordLength = word.length;
+                    
+                    let currentRow = 0;
+                    if (tempCellIndex >= 12 && tempCellIndex < 26) currentRow = 1;
+                    else if (tempCellIndex >= 26 && tempCellIndex < 40) currentRow = 2;
+                    else if (tempCellIndex >= 40) currentRow = 3;
+
+                    const startOfCurrentRow = rowStarts[currentRow];
+                    const cellsInCurrentRow = rowWidths[currentRow];
+                    const charsOnRow = tempCellIndex - startOfCurrentRow;
+                    
+                    const spaceNeeded = (charsOnRow > 0) ? wordLength + 1 : wordLength;
+
+                    if (charsOnRow + spaceNeeded > cellsInCurrentRow) {
+                        tempCellIndex = startOfCurrentRow + cellsInCurrentRow;
+                    }
+
+                    if (tempCellIndex + wordLength > MAX_CELLS) {
+                        isValid = false;
+                        break;
+                    }
+                    
+                    tempCellIndex += wordLength;
+                    if (word !== words[words.length - 1]) {
+                        tempCellIndex++;
+                    }
+                }
+
+                if (isValid) {
+                    return { topic: randomTopic, phrase: randomPhrase };
+                }
+            }
+            
+            return { topic: "Nessuna Frase", phrase: "Non è stato possibile trovare una frase che si adatti al tabellone." };
+        };
+
+        // Funzione per generare una frase e visualizzarla
+        const generatePhrase = () => {
+            const { topic, phrase } = selectValidPhrase();
+            topicTextElement.textContent = `${topic.toUpperCase()}`;
+            fillBoard(phrase);
+        };
+
+        // Funzione principale che tenta di caricare il JSON e poi avvia l'interfaccia
+        const main = async () => {
+            try {
+                // Tenta di caricare il file JSON
+                const response = await fetch('./phrases.json');
+                if (!response.ok) {
+                    throw new Error(`Errore HTTP! Stato: ${response.status}`);
+                }
+                phrasesByTopic = await response.json();
+                console.log("Database di frasi caricato con successo da phrases.json!");
+            } catch (error) {
+                // Se il caricamento fallisce, usa il database di fallback
+                console.error("Errore durante il caricamento di phrases.json, utilizzo il database di fallback:", error);
+                phrasesByTopic = fallbackPhrases;
+            }
+            
+            // Collega l'evento al pulsante dopo aver caricato il database (qualsiasi sia)
+            generateButton.addEventListener('click', generatePhrase);
+            
+            // Inizializza il tabellone e genera la prima frase
+            generateBoard();
+            generatePhrase();
+        };
+
+        // Avvia la funzione principale quando il DOM è pronto
+        main();
+    });
+</script>
+
+</body>
+</html>
