@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruota della Fortuna</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen text-white font-['Orbitron']">
+    <!-- Header del Round -->
+    <div class="text-center py-4 bg-black/30 backdrop-blur-sm border-b border-cyan-500/30">
+        <h1 id="round-title" class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">Round 1</h1>
+        <p id="round-description" class="text-lg text-cyan-300">Gira la ruota e indovina le consonanti!</p>
+    </div>
+
+    <div class="container mx-auto px-4 py-6">
+        <!-- Layout principale -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            
+            <!-- Colonna Sinistra: Ruota -->
+            <div class="xl:col-span-1 flex flex-col items-center">
+                <div class="ruota-container relative mb-6">
+                    <div id="wheel" class="wheel">
+                        <svg viewBox="0 0 600 600" class="w-full h-full">
+                            <!-- I segmenti verranno generati dinamicamente -->
+                        </svg>
+                        <!-- Puntatore -->
+                        <div class="pointer"></div>
+                    </div>
+                </div>
+                
+                <!-- Controlli Gioco -->
+                <div class="flex flex-wrap justify-center gap-3 mb-6">
+                    <button id="spin-btn" class="game-btn bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500">
+                        🎰 GIRA LA RUOTA
+                    </button>
+                    <button id="buy-vowel-btn" class="game-btn bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500">
+                        💰 COMPRA VOCALE (€500)
+                    </button>
+                    <button id="solve-btn" class="game-btn bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-400 hover:to-pink-500">
+                        🎯 RISOLVI
+                    </button>
+                    <button id="next-round-btn" class="game-btn bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 hidden">
+                        ➡️ PROSSIMO ROUND
+                    </button>
+                </div>
+
+                <!-- Turno Corrente -->
+                <div class="text-center bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-cyan-500/30">
+                    <h3 class="text-lg font-bold text-cyan-400 mb-2">Turno di:</h3>
+                    <p id="turn" class="text-2xl font-black text-white">Giocatore 1</p>
+                </div>
+            </div>
+
+            <!-- Colonna Centrale: Puzzle -->
+            <div class="xl:col-span-2">
+                <!-- Categoria -->
+                <div class="text-center mb-6">
+                    <div id="category" class="text-xl md:text-2xl font-bold text-yellow-400 bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-yellow-500/30">
+                        Categoria: In caricamento...
+                    </div>
+                </div>
+
+                <!-- Tabellone Puzzle -->
+                <div class="puzzle-container mb-8">
+                    <div id="puzzle-board" class="puzzle-board">
+                        <!-- Le lettere verranno generate dinamicamente -->
+                    </div>
+                </div>
+
+                <!-- Tastiera -->
+                <div class="keyboard-container">
+                    <h3 class="text-center text-lg font-bold text-cyan-400 mb-4">Tastiera</h3>
+                    <div id="keyboard" class="keyboard">
+                        <!-- I tasti verranno generati dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Punteggi -->
+        <div class="mt-8 bg-black/40 backdrop-blur-sm rounded-lg p-6 border border-cyan-500/30">
+            <h2 class="text-2xl font-bold text-center text-cyan-400 mb-6">Punteggi</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Giocatore 1 -->
+                <div class="player-score bg-gradient-to-br from-purple-600/30 to-blue-600/30 rounded-lg p-4 border border-purple-400/30">
+                    <input type="text" id="player-0-name" value="Giocatore 1" class="player-name-input" />
+                    <div class="score-row">
+                        <span class="score-label">TOT:</span>
+                        <span id="tot-0" class="score-value">€0</span>
+                    </div>
+                    <div class="score-row">
+                        <span class="score-label">ORA:</span>
+                        <span id="ora-0" class="score-value">€0</span>
+                    </div>
+                    <div class="score-row">
+                        <span class="score-label">JOLLY:</span>
+                        <span id="jolly-0" class="jolly-count">0</span>
+                    </div>
+                </div>
+
+                <!-- Giocatore 2 -->
+                <div class="player-score bg-gradient-to-br from-green-600/30 to-teal-600/30 rounded-lg p-4 border border-green-400/30">
+                    <input type="text" id="player-1-name" value="Giocatore 2" class="player-name-input" />
+                    <div class="score-row">
+                        <span class="score-label">TOT:</span>
+                        <span id="tot-1" class="score-value">€0</span>
+                    </div>
+                    <div class="score-row">
+                        <span class="score-label">ORA:</span>
+                        <span id="ora-1" class="score-value">€0</span>
+                    </div>
+                    <div class="score-row">
+                        <span class="score-label">JOLLY:</span>
+                        <span id="jolly-1" class="jolly-count">0</span>
+                    </div>
+                </div>
+
+                <!-- Giocatore 3 -->
+                <div class="player-score bg-gradient-to-br from-red-600/30 to-pink-600/30 rounded-lg p-4 border border-red-400/30">
+                    <input type="text" id="player-2-name" value="Giocatore 3" class="player-name-input" />
+                    <div class="score-row">
+                        <span class="score-label">TOT:</span>
+                        <span id="tot-2" class="score-value">€0</span>
+                    </div>
+                    <div class="score-row">
+                        <span class="score-label">ORA:</span>
+                        <span id="ora-2" class="score-value">€0</span>
+                    </div>
+                    <div class="score-row">
+                        <span class="score-label">JOLLY:</span>
+                        <span id="jolly-2" class="jolly-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay per messaggi -->
+    <div id="message-overlay" class="message-overlay hidden">
+        <div class="message-content">
+            <p id="message-text" class="text-xl font-bold text-center mb-4"></p>
+            <button id="close-message-btn" class="game-btn bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <!-- Overlay per risoluzione -->
+    <div id="solve-input-container" class="message-overlay hidden">
+        <div class="message-content">
+            <h3 class="text-2xl font-bold text-center mb-4 text-cyan-400">Risolvi la Frase</h3>
+            <input type="text" id="solve-input" placeholder="Inserisci la tua soluzione..." class="solve-input" />
+            <div class="flex gap-3 mt-4">
+                <button id="submit-solve-btn" class="game-btn bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500">
+                    ✓ CONFERMA
+                </button>
+                <button id="cancel-solve-btn" class="game-btn bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-400 hover:to-pink-500">
+                    ✗ ANNULLA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

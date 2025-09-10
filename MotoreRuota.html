@@ -396,7 +396,12 @@
             
             winningIndex = Math.floor(Math.random() * numSlices);
             
-            const targetCenter = (winningIndex + 0.5) * sliceDegrees;
+            // *** LA CORREZIONE DEFINITIVA ***
+            // Il sistema di coordinate del Canvas ha 0 gradi a destra ("ore 3").
+            // La logica che usiamo assume implicitamente che lo spicchio 0 sia in alto.
+            // Questa differenza di 90 gradi deve essere compensata.
+            const coordSystemOffset = 90; 
+            const targetCenter = (winningIndex + 0.5) * sliceDegrees + coordSystemOffset;
             
             // La freccetta è in basso, a 90 gradi.
             const pointerTargetDegrees = 90; 
