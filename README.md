@@ -1,2 +1,2 @@
-# RUOTA
+# SpineyWiney
 La ruota della fortunissima
