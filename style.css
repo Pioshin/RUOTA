@@ -57,12 +57,12 @@ body {
 
 /* Pulsanti di gioco */
 .game-btn {
-    padding: 12px 24px;
+    padding: 8px 20px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-family: 'Orbitron', monospace;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 13px;
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -113,19 +113,22 @@ body {
 /* Controlli gioco su una riga */
 .flex.flex-wrap.justify-center.gap-3.mb-6 {
     flex-wrap: nowrap;
-    gap: 12px;
+    gap: 10px;
+    margin-bottom: 1rem; /* Ridotto da mb-6 (1.5rem) */
+    margin-top: 1rem; /* Spazio sopra ridotto */
 }
 
 /* Responsive per i controlli */
 @media (max-width: 768px) {
     .flex.flex-wrap.justify-center.gap-3.mb-6 {
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
+        margin-bottom: 0.75rem;
     }
     
     .game-btn {
-        padding: 8px 12px;
-        font-size: 12px;
+        padding: 6px 10px;
+        font-size: 11px;
     }
 }
 
@@ -236,7 +239,7 @@ body {
 
 /* Tastiera */
 .keyboard-container {
-    margin-top: 30px;
+    margin-top: 20px; /* Ridotto da 30px */
 }
 
 .keyboard {
