@@ -807,8 +807,4 @@ document.addEventListener('DOMContentLoaded', () => {
     createKeyboard();
     createWheelSegments();
     setupRound();
-    // Mostra popup per editare i nomi solo all'avvio iniziale
-    setTimeout(() => {
-        showMessage('Modifica i nomi dei giocatori cliccando sui campi se vuoi personalizzarli!', true, 4000);
-    }, 600);
 });
