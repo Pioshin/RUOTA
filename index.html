@@ -66,21 +66,17 @@
 
                 <!-- Tastiera -->
                 <div class="keyboard-container">
-                    <!-- Selettore File Frasi al posto del titolo -->
+                    <!-- Selettore frasi al posto del titolo -->
                     <div class="flex justify-center items-center gap-3 mb-4">
                         <label for="phrase-file-select" class="text-cyan-400 font-semibold">📁 Set Frasi:</label>
                         <select id="phrase-file-select" class="px-3 py-2 rounded-lg border border-cyan-500/30 bg-black/40 text-cyan-400 font-medium">
                             <option value="default">Frasi Default</option>
-                            <option value="phrases-1.json">Set 1 - Scienza e Sport</option>
-                            <option value="phrases-2.json">Set 2 - Latino e Greco</option>
-                            <option value="phrases-3.json">Set 3 - Personalizzato</option>
+                            <!-- Le opzioni JSON verranno caricate dinamicamente -->
                         </select>
                         <button id="load-phrases-btn" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
                             🔄 CARICA
                         </button>
-                    </div>
-                    
-                    <div id="keyboard" class="keyboard">
+                    </div>                    <div id="keyboard" class="keyboard">
                         <!-- I tasti verranno generati dinamicamente -->
                     </div>
                 </div>

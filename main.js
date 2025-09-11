@@ -144,6 +144,138 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Funzioni Caricamento Frasi JSON ---
     
+    // Funzione per scoprire automaticamente TUTTI i file JSON nella cartella phrases
+    async function discoverPhraseFiles() {
+        try {
+            const select = document.getElementById('phrase-file-select');
+            const availableFiles = [];
+            
+            console.log('🔍 Tentativo di lettura directory phrases/ dal server...');
+            
+            try {
+                // Prova a fare una richiesta alla directory per ottenere il listing
+                const dirResponse = await fetch('phrases/');
+                if (dirResponse.ok) {
+                    const dirHTML = await dirResponse.text();
+                    
+                    // Estrai i nomi dei file .json dal HTML della directory listing
+                    const jsonFiles = [];
+                    const regex = /href="([^"]*\.json)"/gi;
+                    let match;
+                    
+                    while ((match = regex.exec(dirHTML)) !== null) {
+                        const filename = match[1];
+                        if (!filename.includes('/') && filename.endsWith('.json')) {
+                            jsonFiles.push(filename);
+                        }
+                    }
+                    
+                    console.log(`📂 Directory listing trovato! File JSON: ${jsonFiles.length}`);
+                    
+                    // Carica informazioni per ogni file trovato
+                    for (const filename of jsonFiles.sort()) {
+                        try {
+                            console.log(`📄 Caricamento ${filename}...`);
+                            const jsonResponse = await fetch(`phrases/${filename}`);
+                            if (jsonResponse.ok) {
+                                const data = await jsonResponse.json();
+                                
+                                // Verifica formato valido
+                                if (typeof data === 'object' && !Array.isArray(data)) {
+                                    const categories = Object.keys(data);
+                                    if (categories.length > 0) {
+                                        const fileInfo = {
+                                            path: `phrases/${filename}`,
+                                            name: filename
+                                                .replace('.json', '')
+                                                .replace(/[-_]/g, ' ')
+                                                .replace(/\b\w/g, l => l.toUpperCase()),
+                                            filename: filename
+                                        };
+                                        availableFiles.push(fileInfo);
+                                        console.log(`✅ ${filename} caricato correttamente`);
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.warn(`⚠️ Errore caricando ${filename}:`, error);
+                        }
+                    }
+                } else {
+                    throw new Error('Directory listing non disponibile');
+                }
+            } catch (dirError) {
+                console.log('� Directory listing non disponibile, uso metodo di fallback...');
+                
+                // Fallback: prova i file più comuni se la directory listing non funziona
+                const commonFiles = [
+                    'phrases-1.json', 'phrases-2.json', 'phrases-3.json',
+                    'frasi-natale.json', 'quiz-storia.json', 'film.json', 'sport.json',
+                    'storia.json', 'geografia.json', 'scienza.json', 'arte.json',
+                    'custom.json', 'test.json', 'mio.json', 'personalizzato.json'
+                ];
+                
+                for (const filename of commonFiles) {
+                    try {
+                        const response = await fetch(`phrases/${filename}`, { method: 'HEAD' });
+                        if (response.ok) {
+                            const jsonResponse = await fetch(`phrases/${filename}`);
+                            if (jsonResponse.ok) {
+                                const data = await jsonResponse.json();
+                                if (typeof data === 'object' && !Array.isArray(data)) {
+                                    const categories = Object.keys(data);
+                                    if (categories.length > 0) {
+                                        availableFiles.push({
+                                            path: `phrases/${filename}`,
+                                            name: filename.replace('.json', '').replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                                            filename: filename
+                                        });
+                                        console.log(`✅ Fallback: trovato ${filename}`);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        // Continua silenziosamente
+                    }
+                }
+            }
+            
+            // Ordina per nome file
+            availableFiles.sort((a, b) => a.filename.localeCompare(b.filename));
+            
+            // Popola il selettore
+            availableFiles.forEach(file => {
+                const option = document.createElement('option');
+                option.value = file.path;
+                option.textContent = file.name;
+                select.appendChild(option);
+            });
+            
+            if (availableFiles.length > 0) {
+                console.log(`🎯 Discovery completata: ${availableFiles.length} file trovati:`, 
+                    availableFiles.map(f => f.filename));
+                
+                const successDiv = document.createElement('div');
+                successDiv.className = 'fixed top-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg z-50';
+                successDiv.textContent = `🎉 Auto-discovery: ${availableFiles.length} set di frasi trovati!`;
+                document.body.appendChild(successDiv);
+                setTimeout(() => successDiv.remove(), 4000);
+            } else {
+                console.log('📁 Nessun file JSON valido trovato in phrases/');
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'fixed top-4 left-4 bg-blue-500 text-white px-4 py-2 rounded-lg z-50';
+                infoDiv.textContent = '📁 Aggiungi file .json nella cartella phrases/';
+                document.body.appendChild(infoDiv);
+                setTimeout(() => infoDiv.remove(), 4000);
+            }
+            
+        } catch (error) {
+            console.error('❌ Errore nella discovery automatica:', error);
+        }
+    }
+    
     async function loadPhrasesFromJSON(filename) {
         try {
             console.log('Tentativo di fetch del file:', filename);
@@ -807,4 +939,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createKeyboard();
     createWheelSegments();
     setupRound();
+    
+    // Scopri automaticamente i file JSON disponibili
+    discoverPhraseFiles();
 });
