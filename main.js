@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const puzzleBoard = document.getElementById('puzzle-board');
     const categoryDisplay = document.getElementById('category');
-    const turnDisplay = document.getElementById('turn');
     
     const messageOverlay = document.getElementById('message-overlay');
     const messageText = document.getElementById('message-text');
@@ -173,8 +172,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         setGameState('SPIN');
-        const playerName = document.getElementById(`player-${currentPlayerIndex}-name`).value;
-        turnDisplay.textContent = playerName;
+        updateActivePlayer();
+    }
+    
+    function updateActivePlayer() {
+        // Rimuovi la classe active da tutti i giocatori
+        for (let i = 0; i < 3; i++) {
+            const playerBox = document.querySelector(`.player-score:nth-child(${i + 1})`);
+            if (playerBox) playerBox.classList.remove('active');
+        }
+        
+        // Aggiungi la classe active al giocatore corrente
+        const activePlayerBox = document.querySelector(`.player-score:nth-child(${currentPlayerIndex + 1})`);
+        if (activePlayerBox) activePlayerBox.classList.add('active');
     }
     
     function renderPuzzleBoard() {
@@ -386,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function passTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % playerScores.length;
         const playerName = document.getElementById(`player-${currentPlayerIndex}-name`).value;
-        turnDisplay.textContent = playerName;
+        updateActivePlayer();
         showMessage(`Ora è il turno di ${playerName}`, true, 1500);
         setGameState('SPIN');
     }
@@ -407,6 +417,14 @@ document.addEventListener('DOMContentLoaded', () => {
         updateScores();
         const playerName = document.getElementById(`player-${currentPlayerIndex}-name`).value;
         showMessage(`Round completato! ${playerName} vince il montepremi del round!`, false);
+        
+        // Cambia la label del pulsante se siamo all'ultimo round
+        if (currentRoundIndex === gameRounds.length - 1) {
+            nextRoundBtn.textContent = '🔄 RICOMINCIA';
+        } else {
+            nextRoundBtn.textContent = '➡️ PROSSIMO ROUND';
+        }
+        
         nextRoundBtn.classList.remove('hidden');
     }
     
