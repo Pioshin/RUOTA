@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastTickIndex = -1;
     let spinAnimationId = null;
     let spinStartTime = null;
-    let spinDuration = 3000; // 3 secondi
+    let spinDuration = 5000; // 5 secondi per rallentamento ancora più graduale
     let startAngle = 0;
     let targetAngle = 0;
     
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Funzioni Audio ---
     
-    function playTick() {
+    function playTick(pitchFactor = 1.0) {
         try {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -153,7 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+            // Frequenza variabile per simulare rallentamento
+            const baseFreq = 440 * pitchFactor;
+            oscillator.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
             gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
             oscillator.start(audioCtx.currentTime);
@@ -335,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const desiredMod = (90 - targetCenter + 360) % 360;
         const base = ((currentWheelAngle % 360) + 360) % 360;
         const needed = (desiredMod - base + 360) % 360;
-        const spins = 360 * 5; // giri completi per animazione
+        const spins = 360 * 3; // giri completi per animazione (ridotto da 5 a 3)
         
         startAngle = currentWheelAngle;
         targetAngle = currentWheelAngle + spins + needed;
@@ -361,12 +363,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const elapsed = currentTime - spinStartTime;
         const progress = Math.min(elapsed / spinDuration, 1);
         
-        // Funzione di easing (rallentamento graduale)
-        const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
-        const easedProgress = easeOutQuint(progress);
+        // Curva che accelera rapidamente all'inizio e rallenta gradualmente
+        const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+        const smoothProgress = easeOutCubic(progress);
         
         // Calcola l'angolo corrente
-        const currentAngle = startAngle + (targetAngle - startAngle) * easedProgress;
+        const currentAngle = startAngle + (targetAngle - startAngle) * smoothProgress;
         
         // Applica la rotazione
         wheel.style.transform = `rotate(${currentAngle}deg)`;
@@ -378,9 +380,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const normalizedAngle = (currentAngle % 360 + 360) % 360;
         const currentTickIndex = Math.floor(((pointerAngle - normalizedAngle + 360) % 360) / segmentDegrees);
         
-        // Riproduci il suono tick quando cambia segmento
+        // Riproduci il suono tick quando cambia segmento (con pitch variabile per realismo)
         if (currentTickIndex !== lastTickIndex && progress < 0.95) { // Smetti di fare tick quasi alla fine
-            playTick();
+            // Frequenza più bassa verso la fine per simulare rallentamento
+            const pitchFactor = 1.0 - (progress * 0.3); // Diminuisce del 30% max
+            playTick(pitchFactor);
             lastTickIndex = currentTickIndex;
         }
         
