@@ -35,6 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSpinValue = null;
     let gameState = '';
     
+    // Variabili per l'audio e l'animazione realistica
+    let audioCtx = null;
+    let lastTickIndex = -1;
+    let spinAnimationId = null;
+    let spinStartTime = null;
+    let spinDuration = 3000; // 3 secondi
+    let startAngle = 0;
+    let targetAngle = 0;
+    
     const VOWELS = ['A', 'E', 'I', 'O', 'U'];
     const CONSONANTS = 'BCDFGHJKLMNPQRSTVWXYZ'.split('');
 
@@ -131,6 +140,36 @@ document.addEventListener('DOMContentLoaded', () => {
         { category: "Animali", phrase: "CANE GATTO E CANARINO" },
         { category: "Clima", phrase: "CAMBIAMENTO CLIMATICO" },
     ];
+    
+    // --- Funzioni Audio ---
+    
+    function playTick() {
+        try {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.05);
+            
+            // Effetto wobble sulla freccetta
+            const pointer = document.querySelector('.pointer');
+            if (pointer) {
+                pointer.classList.remove('wobble');
+                void pointer.offsetWidth; // Forza il reflow
+                pointer.classList.add('wobble');
+            }
+        } catch (error) {
+            console.log('Audio non disponibile:', error);
+        }
+    }
     
     // --- Funzioni Principali di Gioco ---
 
@@ -274,29 +313,81 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         if (wheelSpinning) return;
+        
+        // Inizializza audio context se necessario
+        if (!audioCtx) {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (error) {
+                console.log('Audio non disponibile:', error);
+            }
+        }
+        
         setGameState('SPINNING');
         wheelSpinning = true;
-
+        
         const numSegments = wheelSegments.length;
         const segmentDegrees = 360 / numSegments;
-        // Precalcola l'esito e allinea il centro dello spicchio alle ore 6 (90° da +x)
+        
+        // Precalcola l'esito
         const randomStopIndex = Math.floor(Math.random() * numSegments);
-        const targetCenter = (randomStopIndex + 0.5) * segmentDegrees; // da +x CCW
-        const desiredMod = (90 - targetCenter + 360) % 360; // per portarlo a ore 6
+        const targetCenter = (randomStopIndex + 0.5) * segmentDegrees;
+        const desiredMod = (90 - targetCenter + 360) % 360;
         const base = ((currentWheelAngle % 360) + 360) % 360;
         const needed = (desiredMod - base + 360) % 360;
         const spins = 360 * 5; // giri completi per animazione
-        const stopAngle = currentWheelAngle + spins + needed;
-
-        wheel.style.transform = `rotate(${stopAngle}deg)`;
-
-        wheel.addEventListener('transitionend', () => {
+        
+        startAngle = currentWheelAngle;
+        targetAngle = currentWheelAngle + spins + needed;
+        spinStartTime = performance.now();
+        lastTickIndex = -1;
+        
+        // Inizia l'animazione personalizzata
+        animateWheelSpin();
+        
+        // Salva il risultato per dopo
+        setTimeout(() => {
             wheelSpinning = false;
-            // Usa l'esito precalcolato
             const result = wheelSegments[randomStopIndex];
             handleSpinResult(result);
-            currentWheelAngle = stopAngle;
-        }, { once: true });
+            currentWheelAngle = targetAngle;
+        }, spinDuration);
+    }
+    
+    function animateWheelSpin() {
+        if (!wheelSpinning) return;
+        
+        const currentTime = performance.now();
+        const elapsed = currentTime - spinStartTime;
+        const progress = Math.min(elapsed / spinDuration, 1);
+        
+        // Funzione di easing (rallentamento graduale)
+        const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
+        const easedProgress = easeOutQuint(progress);
+        
+        // Calcola l'angolo corrente
+        const currentAngle = startAngle + (targetAngle - startAngle) * easedProgress;
+        
+        // Applica la rotazione
+        wheel.style.transform = `rotate(${currentAngle}deg)`;
+        
+        // Calcola il segmento corrente per il suono tick
+        const numSegments = wheelSegments.length;
+        const segmentDegrees = 360 / numSegments;
+        const pointerAngle = 90; // Freccetta alle ore 6
+        const normalizedAngle = (currentAngle % 360 + 360) % 360;
+        const currentTickIndex = Math.floor(((pointerAngle - normalizedAngle + 360) % 360) / segmentDegrees);
+        
+        // Riproduci il suono tick quando cambia segmento
+        if (currentTickIndex !== lastTickIndex && progress < 0.95) { // Smetti di fare tick quasi alla fine
+            playTick();
+            lastTickIndex = currentTickIndex;
+        }
+        
+        // Continua l'animazione
+        if (progress < 1) {
+            spinAnimationId = requestAnimationFrame(animateWheelSpin);
+        }
     }
     
     function handleSpinResult(result) {

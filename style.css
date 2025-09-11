@@ -30,7 +30,6 @@ body {
         0 0 30px rgba(0, 255, 255, 0.5),
         inset 0 0 20px rgba(255, 255, 255, 0.1),
         0 0 60px rgba(138, 43, 226, 0.3);
-    transition: transform 3s cubic-bezier(0.23, 1, 0.32, 1);
     transform-origin: center center;
 }
 
@@ -53,6 +52,18 @@ body {
     border-bottom: 30px solid #00ffff;
     z-index: 10;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+    transition: transform 0.1s ease-out;
+}
+
+/* Animazione wobble per la freccetta */
+@keyframes wobble {
+    0%, 100% { transform: translateX(-50%) rotate(0deg); }
+    25% { transform: translateX(-50%) rotate(-5deg); }
+    75% { transform: translateX(-50%) rotate(5deg); }
+}
+
+.pointer.wobble {
+    animation: wobble 0.15s ease-in-out;
 }
 
 /* Pulsanti di gioco */
