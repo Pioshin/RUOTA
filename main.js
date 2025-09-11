@@ -114,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { type: 'FINALE', title: 'Round Finale', description: 'Il vincitore gioca per il super premio!'},
     ];
 
-    const phrases = [
+    // Frasi del gioco - ora caricate dinamicamente
+    let phrases = [
         { category: "Città Italiane", phrase: "ROMA CAPUT MUNDI" },
         { category: "Città Italiane", phrase: "NAPOLI CITTA PARTENOPEA" },
         { category: "Città Italiane", phrase: "FIRENZE CULLA DEL RINASCIMENTO" },
@@ -140,6 +141,58 @@ document.addEventListener('DOMContentLoaded', () => {
         { category: "Animali", phrase: "CANE GATTO E CANARINO" },
         { category: "Clima", phrase: "CAMBIAMENTO CLIMATICO" },
     ];
+    
+    // --- Funzioni Caricamento Frasi JSON ---
+    
+    async function loadPhrasesFromJSON(filename) {
+        try {
+            console.log('Tentativo di fetch del file:', filename);
+            const response = await fetch(filename);
+            console.log('Response status:', response.status, response.ok);
+            
+            if (!response.ok) {
+                throw new Error(`Errore HTTP: ${response.status}`);
+            }
+            const jsonData = await response.json();
+            console.log('Dati JSON caricati:', jsonData);
+            
+            // Converte il formato JSON {categoria: [frasi]} nel formato richiesto
+            const newPhrases = [];
+            for (const [category, phraseList] of Object.entries(jsonData)) {
+                phraseList.forEach(phrase => {
+                    newPhrases.push({
+                        category: category,
+                        phrase: phrase.toUpperCase()
+                    });
+                });
+            }
+            
+            phrases = newPhrases;
+            console.log(`Caricate ${phrases.length} frasi da ${filename}`);
+            
+            // Mostra messaggio di conferma
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg z-50';
+            messageDiv.textContent = `✅ Caricate ${phrases.length} frasi da ${filename}`;
+            document.body.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+            
+            // Reset del gioco se necessario
+            if (currentPhrase) {
+                setupRound();
+            }
+            
+        } catch (error) {
+            console.error('Errore nel caricamento delle frasi:', error);
+            
+            // Mostra messaggio di errore
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg z-50';
+            errorDiv.textContent = `❌ Errore caricando ${filename}`;
+            document.body.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 3000);
+        }
+    }
     
     // --- Funzioni Audio ---
     
@@ -719,6 +772,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     closeMessageBtn.addEventListener('click', hideMessage);
+
+    // --- Event Listener per Caricamento Frasi ---
+    const phraseFileSelect = document.getElementById('phrase-file-select');
+    const loadPhrasesBtn = document.getElementById('load-phrases-btn');
+    
+    loadPhrasesBtn.addEventListener('click', () => {
+        const selectedFile = phraseFileSelect.value;
+        console.log('Tentativo di caricamento file:', selectedFile);
+        
+        if (selectedFile === 'default') {
+            // Ricarica le frasi default
+            location.reload();
+        } else {
+            loadPhrasesFromJSON(selectedFile);
+        }
+    });
 
     // --- Animazione Jolly ---
     function showJollyAnimation(playerIdx) {
